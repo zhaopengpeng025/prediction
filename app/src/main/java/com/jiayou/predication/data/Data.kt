@@ -1,19 +1,14 @@
 package com.jiayou.predication.data
 
-<<<<<<< Updated upstream
-=======
+
 import android.graphics.Point
 import androidx.compose.ui.graphics.Color
 
->>>>>>> Stashed changes
 /***********************************************
  * Author: ZhaoPengpeng
  * Date: 2023/1/17
  * Describe:
  ***********************************************/
-<<<<<<< Updated upstream
-=======
-
 data class CharPoint(val c: Char = ' ', val point: Point = Point(-1, -1)) {
   fun isEmpty(): Boolean = c == ' '
 }
@@ -57,4 +52,3 @@ enum class Player(val color: Color, name: String) {
 enum class PlayState {
   IDLE, CHANCE1, CHANCE2, SHOW_RESULTS
 }
->>>>>>> Stashed changes

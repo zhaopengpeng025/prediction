@@ -1,7 +1,5 @@
 package com.jiayou.predication
 
-<<<<<<< Updated upstream
-=======
 import android.graphics.Point
 import androidx.lifecycle.ViewModel
 import com.jiayou.predication.data.CharPoint
@@ -14,14 +12,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
->>>>>>> Stashed changes
 /***********************************************
  * Author: ZhaoPengpeng
  * Date: 2023/1/18
  * Describe:
-<<<<<<< Updated upstream
- ***********************************************/class MainViewModel {
-=======
  ***********************************************/
 class MainViewModel : ViewModel() {
 
@@ -73,5 +67,4 @@ class MainViewModel : ViewModel() {
     const val COLUMN = 5
     const val ROW = 5
   }
->>>>>>> Stashed changes
 }

@@ -1,7 +1,5 @@
 package com.jiayou.predication.ui.screen
 
-<<<<<<< Updated upstream
-=======
 import android.graphics.Point
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -42,14 +40,11 @@ import com.jiayou.predication.data.Pairs
 import com.jiayou.predication.data.Player
 import com.jiayou.predication.ui.GridUiState
 
->>>>>>> Stashed changes
 /***********************************************
  * Author: Zhao Pengpeng
  * Date: 2023/1/13
  * Describe:
  ***********************************************/
-<<<<<<< Updated upstream
-=======
 @Composable
 fun GameMainScreen() {
   Column(
@@ -191,4 +186,3 @@ fun main() {
 
   println("dsf$c")
 }
->>>>>>> Stashed changes

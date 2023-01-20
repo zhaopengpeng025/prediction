@@ -1,7 +1,5 @@
 package com.jiayou.predication.ui.custom
 
-<<<<<<< Updated upstream
-=======
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,14 +25,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jiayou.predication.ui.theme.Purple40
 
->>>>>>> Stashed changes
 /***********************************************
  * Author: Zhao Pengpeng
  * Date: 2023/1/13
  * Describe:
  ***********************************************/
-<<<<<<< Updated upstream
-=======
 @Composable
 fun ActionBar() {
   Row(
@@ -77,4 +72,3 @@ fun TopBar() {
     }
   )
 }
->>>>>>> Stashed changes

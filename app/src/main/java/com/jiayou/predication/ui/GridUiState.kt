@@ -1,21 +1,15 @@
 package com.jiayou.predication.ui
 
-<<<<<<< Updated upstream
-=======
 import android.graphics.Point
 import com.jiayou.predication.data.GridData
 import com.jiayou.predication.data.Pairs
 import com.jiayou.predication.data.PlayState
 import com.jiayou.predication.data.Player
 
->>>>>>> Stashed changes
 /***********************************************
  * Author: ZhaoPengpeng
  * Date: 2023/1/18
  * Describe:
-<<<<<<< Updated upstream
- ***********************************************/data class GridUiState()
-=======
  ***********************************************/
 data class GridUiState(
   val randomLetters: List<Char>,
@@ -44,4 +38,3 @@ data class GridUiState(
     }
   }
 }
->>>>>>> Stashed changes
