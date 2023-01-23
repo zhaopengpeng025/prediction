@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         // A surface container using the 'background' color from the theme
         Scaffold(
           modifier = Modifier.fillMaxSize(),
-          topBar = { TopBar() }
+          topBar = { TopBar(this) }
         ) {
           GameMainScreen()
         }

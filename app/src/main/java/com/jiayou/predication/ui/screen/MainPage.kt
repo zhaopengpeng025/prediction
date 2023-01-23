@@ -1,10 +1,12 @@
 package com.jiayou.predication.ui.screen
 
 import android.graphics.Point
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,8 +27,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -37,6 +41,7 @@ import com.jiayou.predication.MainViewModel
 import com.jiayou.predication.data.CharPoint
 import com.jiayou.predication.data.GridData
 import com.jiayou.predication.data.Pairs
+import com.jiayou.predication.data.PlayState
 import com.jiayou.predication.data.Player
 import com.jiayou.predication.ui.GridUiState
 
@@ -55,12 +60,15 @@ fun GameMainScreen() {
   ) {
     val viewModel: MainViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
+
+    TopTips(uiState.round, uiState.player, uiState.playState)
+
     GameGrid(uiState)
 
-    RandomCharBar(uiState.randomLetters, uiState.chosenLetter, uiState.playerType)
+    RandomCharBar(uiState.randomLetters, uiState.chosenLetter, uiState.player)
 
     OutlinedButton(
-      onClick = { /*TODO*/ },
+      onClick = { viewModel.buttonOk() },
       Modifier
         .width(250.dp)
         .padding(top = 30.dp)
@@ -69,7 +77,7 @@ fun GameMainScreen() {
     }
 
     OutlinedButton(
-      onClick = { /*TODO*/ },
+      onClick = { viewModel.buttonNextRound() },
       Modifier.width(250.dp)
     ) {
       Text(text = "NEXT")
@@ -79,11 +87,20 @@ fun GameMainScreen() {
 
 @Composable
 fun GameGrid(uiState: GridUiState) {
+  val gridDataMap = if (uiState.playState == PlayState.SHOW_RESULTS) {
+    uiState.allGridDataMap
+  } else {
+    uiState.toGridDataMap()
+  }
+
   Column(Modifier.padding(top = 50.dp)) {
     for (y in 0 until MainViewModel.ROW) {
       Row(Modifier.wrapContentSize()) {
         for (x in 0 until MainViewModel.COLUMN) {
-          GridItem(findGridData(uiState.toGridDataList(), x, y))
+          GridItem(
+            findGridData(gridDataMap, x, y),
+            Point(x, y)
+          )
         }
       }
     }
@@ -100,39 +117,78 @@ private fun findGridData(gridMap: Map<Point, GridData>, x: Int, y: Int): GridDat
 }
 
 @Composable
-fun GridItem(gridData: GridData?, size: Dp = 50.dp, textSize: TextUnit = 20.sp) {
+fun GridItem(gridData: GridData?, point: Point, size: Dp = 50.dp, textSize: TextUnit = 20.sp) {
+  val viewModel = viewModel<MainViewModel>()
   Row(
     Modifier
       .size(size)
       .border(0.5.dp, Color.LightGray)
-      .clickable { }
+      .clickable { viewModel.pasteChosenLetter(point) }
   ) {
     gridData?.let {
-      val gridList = gridData.toList()
-      for (player in gridList) {
-        Column(
-          Modifier
-            .width(size / 2)
-            .fillMaxHeight()
-        ) {
-          val letters = player.toList()
-          for (letter in letters) {
-            if (letter.c.toString().trim().isBlank()) continue
-            Text(
-              text = letter.c.toString(),
-              Modifier
-                .fillMaxWidth()
-                .height(size / 2),
-              color = player.color!!,
-              fontSize = textSize,
-              textAlign = TextAlign.Center,
-              overflow = TextOverflow.Visible,
-              softWrap = false
-            )
-          }
-        }
-      }
+      PlayerComboText(gridData.red, Player.RED.color, size, textSize)
+      PlayerComboText(it.blue, Player.BLUE.color, size, textSize)
     }
+  }
+}
+
+@Composable
+fun PlayerComboText(pairs: Pairs, color: Color, size: Dp = 50.dp, textSize: TextUnit = 20.sp) {
+  Log.d("zpp", "Pairs: $pairs")
+  Column(
+    Modifier
+      .width(size / 2)
+      .fillMaxHeight()
+  ) {
+    CommonText(
+      text = pairs.first.letter.toString(),
+      color = color,
+      height = size / 2,
+      textSize = textSize
+    )
+    CommonText(
+      text = pairs.second.letter.toString(),
+      color = color,
+      height = size / 2,
+      textSize = textSize
+    )
+  }
+}
+
+@Composable
+fun CommonText(text: String, color: Color, height: Dp, textSize: TextUnit) {
+  Log.d("zpp", "common text:$text")
+  Text(
+    text = text,
+    Modifier
+      .fillMaxWidth()
+      .height(height),
+    color = color,
+    fontSize = textSize,
+    textAlign = TextAlign.Center
+  )
+}
+
+@Preview
+@Composable
+fun PreviewPlayerText() {
+  Row(
+    Modifier
+      .size(50.dp)
+      .border(0.5.dp, Color.LightGray)
+  ) {
+    PlayerComboText(
+      Pairs(CharPoint('A'), CharPoint('B')),
+      Player.RED.color,
+      50.dp,
+      20.sp
+    )
+    PlayerComboText(
+      Pairs(CharPoint('A'), CharPoint('B')),
+      Player.RED.color,
+      50.dp,
+      20.sp
+    )
   }
 }
 
@@ -143,7 +199,8 @@ fun PreviewGridItem() {
     GridData(
       Pairs(CharPoint('A'), CharPoint('B')),
       Pairs(CharPoint('C'), CharPoint('D'))
-    )
+    ),
+    Point(0, 0)
   )
 }
 
@@ -155,12 +212,7 @@ fun RandomCharBar(letters: List<Char>, chosenLetter: Char, player: Player) {
       Box(
         Modifier
           .size(41.6.dp)
-          .border(
-            BorderStroke(
-              0.5.dp,
-              if (chosenLetter == l) player.color else Color.LightGray
-            )
-          )
+          .border(BorderStroke(0.5.dp, if (chosenLetter == l) player.color else Color.LightGray))
           .clickable { viewModel.selectLetter(l) },
         contentAlignment = Alignment.Center
       ) {
@@ -179,6 +231,46 @@ fun PreviewRandomBar() {
     if (list.contains(c).not()) list.add(c)
   }
   RandomCharBar(letters = list, 'Z', Player.RED)
+}
+
+@Composable
+fun TopTips(round: Int, player: Player, playState: PlayState) {
+  var chanceRound: Int = -1
+  if (playState == PlayState.CHANCE1) {
+    chanceRound = 1
+  } else if (playState == PlayState.CHANCE2) {
+    chanceRound = 2
+  }
+  Column(
+    Modifier.padding(top = 30.dp).height(100.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center
+  ) {
+    if (playState != PlayState.SHOW_RESULTS) {
+      val roundString = buildAnnotatedString {
+        append("第")
+        withStyle(style = SpanStyle(Color(0xFFE91E63), 30.sp)) {
+          append(round.toString())
+        }
+        append("轮")
+      }
+      val playerString = buildAnnotatedString {
+        withStyle(style = SpanStyle(player.color, 30.sp)) {
+          append("${player.text}轮次:$chanceRound")
+        }
+      }
+      Text(text = roundString, fontSize = 20.sp, letterSpacing = 5.sp)
+      Text(text = playerString, fontSize = 20.sp, letterSpacing = 5.sp)
+    } else {
+      Text(text = "本轮完毕 展示双方选择结果")
+    }
+  }
+}
+
+@Preview
+@Composable
+fun PrevTopTips() {
+  TopTips(round = 2, player = Player.BLUE, playState = PlayState.CHANCE2)
 }
 
 fun main() {

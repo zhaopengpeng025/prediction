@@ -1,6 +1,5 @@
 package com.jiayou.predication.data
 
-
 import android.graphics.Point
 import androidx.compose.ui.graphics.Color
 
@@ -9,8 +8,8 @@ import androidx.compose.ui.graphics.Color
  * Date: 2023/1/17
  * Describe:
  ***********************************************/
-data class CharPoint(val c: Char = ' ', val point: Point = Point(-1, -1)) {
-  fun isEmpty(): Boolean = c == ' '
+data class CharPoint(val letter: Char = ' ', val point: Point = Point(-1, -1)) {
+  fun isEmpty(): Boolean = letter == ' '
 }
 
 data class Pairs constructor(
@@ -28,13 +27,14 @@ data class Pairs constructor(
   }
 }
 
-class GridData constructor(
+data class GridData constructor(
   val red: Pairs = Pairs(),
-  val blue: Pairs = Pairs(),
+  val blue: Pairs = Pairs()
 ) {
-  fun redColor() = Player.RED.color
+  private fun redColor() = Player.RED.color
 
-  fun blueColor() = Player.BLUE.color
+  private fun blueColor() = Player.BLUE.color
+
   fun toList(): List<Pairs> {
     val list = mutableListOf<Pairs>()
     red.color = redColor()
@@ -45,8 +45,9 @@ class GridData constructor(
   }
 }
 
-enum class Player(val color: Color, name: String) {
-  RED(Color(0xFFF44336), "红方"), BLUE(Color(0xFF2196F3), "蓝方")
+enum class Player(val color: Color, val text: String) {
+  RED(Color(0xFFF44336), "红方"),
+  BLUE(Color(0xFF2196F3), "蓝方")
 }
 
 enum class PlayState {

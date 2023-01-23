@@ -13,16 +13,16 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jiayou.predication.MainActivity
+import com.jiayou.predication.MainViewModel
 import com.jiayou.predication.ui.theme.Purple40
 
 /***********************************************
@@ -47,15 +47,15 @@ fun ActionBar() {
   }
 }
 
-@Preview
 @Composable
-fun TopBar() {
+fun TopBar(mainActivity: MainActivity) {
+  val viewModel = viewModel<MainViewModel>()
   CenterAlignedTopAppBar(
     title = {
       Text(text = "练习")
     },
     navigationIcon = {
-      IconButton(onClick = { /* doSomething() */ }) {
+      IconButton(onClick = { mainActivity.finish() }) {
         Icon(
           imageVector = Icons.Filled.ArrowBack,
           contentDescription = "Back"
@@ -63,7 +63,7 @@ fun TopBar() {
       }
     },
     actions = {
-      IconButton(onClick = { /* doSomething() */ }) {
+      IconButton(onClick = { viewModel.buttonClearLetters() }) {
         Icon(
           imageVector = Icons.Filled.Delete,
           contentDescription = "Back"

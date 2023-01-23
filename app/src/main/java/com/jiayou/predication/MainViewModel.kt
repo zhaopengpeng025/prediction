@@ -22,9 +22,11 @@ class MainViewModel : ViewModel() {
   private val _uiState = MutableStateFlow(GridUiState(generateRandomChar()))
   val uiState: StateFlow<GridUiState> = _uiState.asStateFlow()
 
+  private var round = 1
+
   init {
     _uiState.update {
-      it.copy(round = 1, playState = PlayState.CHANCE1)
+      it.copy(round = round, playState = PlayState.CHANCE1)
     }
   }
 
@@ -40,16 +42,16 @@ class MainViewModel : ViewModel() {
     return list
   }
 
-  fun pasteChosenLetter(letter: Char, x: Int, y: Int) {
+  fun pasteChosenLetter(point: Point) {
     _uiState.update { state ->
-      val updatePairs = if (state.playerType == Player.RED) state.redPairs else state.redPairs
-      updatePairs ?: Pairs()
-      if (updatePairs!!.first.isEmpty()) {
-        updatePairs.first = CharPoint(letter, Point(x, y))
-      } else {
-        updatePairs.second = CharPoint(letter, Point(x, y))
+      val updatePairs =
+        (if (state.player == Player.RED) state.redPairs else state.bluePairs)?.copy() ?: Pairs()
+      if (state.playState == PlayState.CHANCE1) {
+        updatePairs.first = CharPoint(state.chosenLetter, point)
+      } else if (state.playState == PlayState.CHANCE2) {
+        updatePairs.second = CharPoint(state.chosenLetter, point)
       }
-      if (state.playerType == Player.RED) {
+      if (state.player == Player.RED) {
         state.copy(redPairs = updatePairs)
       } else {
         state.copy(bluePairs = updatePairs)
@@ -62,6 +64,75 @@ class MainViewModel : ViewModel() {
       state.copy(chosenLetter = letter)
     }
   }
+
+  fun buttonOk() {
+    _uiState.value.let { state ->
+      if (state.chosenLetter == ' ') return
+      val pairs = if (state.player == Player.RED) state.redPairs else state.bluePairs
+      pairs ?: return
+      if ((pairs.first.isEmpty() && state.playState == PlayState.CHANCE1) ||
+        (pairs.second.isEmpty() && state.playState == PlayState.CHANCE2)
+      ) return
+    }
+    _uiState.update { state ->
+      val newState = nextPlayState(state)
+      val newPlayer = nextPlayer(state)
+      if (newPlayer != null) {
+        state.saveGridDataMap()
+        state.copy(
+          playState = newState,
+          player = newPlayer,
+          chosenLetter = ' ',
+          redPairs = null,
+          bluePairs = null
+        )
+      } else {
+        state.copy(playState = newState, chosenLetter = ' ')
+      }
+    }
+  }
+
+  private fun nextPlayState(state: GridUiState) = when (state.playState) {
+    PlayState.CHANCE1 -> PlayState.CHANCE2
+    PlayState.CHANCE2 -> {
+      if (state.player == Player.BLUE) {
+        state.saveGridDataMap()
+        PlayState.SHOW_RESULTS
+      } else {
+        PlayState.CHANCE1
+      }
+    }
+    PlayState.IDLE, PlayState.SHOW_RESULTS -> {
+      PlayState.SHOW_RESULTS
+    }
+  }
+
+  private fun nextPlayer(state: GridUiState): Player? {
+    return if (state.player == Player.RED && state.playState == PlayState.CHANCE2) {
+      Player.BLUE
+    } else null
+  }
+
+  fun buttonNextRound() {
+    val state = defaultState()
+    _uiState.value = state
+  }
+
+  fun buttonClearLetters() {
+    _uiState.update { state ->
+      if(state.player == Player.RED){
+        state.copy(redPairs = null, playState = PlayState.CHANCE1)
+      }else{
+        state.copy(bluePairs = null,playState = PlayState.CHANCE1)
+      }
+    }
+  }
+
+  private fun defaultState() = GridUiState(
+    generateRandomChar(),
+    round = ++round,
+    playState = PlayState.CHANCE1
+  )
 
   companion object {
     const val COLUMN = 5
