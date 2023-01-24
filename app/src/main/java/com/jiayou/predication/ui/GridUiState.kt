@@ -1,6 +1,7 @@
 package com.jiayou.predication.ui
 
 import android.graphics.Point
+import android.util.Log
 import com.jiayou.predication.data.CharPoint
 import com.jiayou.predication.data.GridData
 import com.jiayou.predication.data.Pairs
@@ -31,12 +32,14 @@ data class GridUiState(
   }
 
   fun saveGridDataMap() {
+    Log.d("zpp", "saveGrid")
     val map = toGridDataMap()
     if (allGridDataMap.isEmpty()) {
       allGridDataMap.putAll(map)
       return
     }
     for ((key, value) in map) {
+      val incMap = mutableMapOf<Point, GridData>()
       for (allKey in allGridDataMap.keys) {
         if (key == allKey) {
           allGridDataMap.compute(key) { _, v ->
@@ -45,9 +48,11 @@ data class GridUiState(
             } ?: if (player == Player.RED) GridData(value.red) else GridData(blue = value.blue)
           }
         } else {
-          allGridDataMap[key] = value
+          incMap[key] = value
+          break
         }
       }
+      if (incMap.isNotEmpty()) allGridDataMap.putAll(incMap)
     }
   }
 
