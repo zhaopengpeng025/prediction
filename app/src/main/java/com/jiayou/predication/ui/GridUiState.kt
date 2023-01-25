@@ -19,66 +19,51 @@ data class GridUiState(
   val player: Player = Player.RED,
   val playState: PlayState = PlayState.IDLE,
   val chosenLetter: Char = ' ',
-  val redPairs: Pairs? = null,
-  val bluePairs: Pairs? = null,
+  val gridDataMap: MutableMap<Point, GridData> = mutableMapOf(),
   val allGridDataMap: MutableMap<Point, GridData> = mutableMapOf()
 ) {
 
-  fun toGridDataMap(): Map<Point, GridData> {
-    val gridDataMap = mutableMapOf<Point, GridData>()
-    convertPairs2GridDataMap(redPairs, gridDataMap)
-    convertPairs2GridDataMap(bluePairs, gridDataMap)
-    return gridDataMap
-  }
+  val isRed: Boolean
+    get() = player == Player.RED
 
   fun saveGridDataMap() {
     Log.d("zpp", "saveGrid")
-    val map = toGridDataMap()
+    val map = gridDataMap
     if (allGridDataMap.isEmpty()) {
       allGridDataMap.putAll(map)
       return
     }
     for ((key, value) in map) {
-      val incMap = mutableMapOf<Point, GridData>()
+      var hasOldKey = false
       for (allKey in allGridDataMap.keys) {
+        // allKey 为 RED key; key 为 BLUE key
         if (key == allKey) {
+          hasOldKey = true
           allGridDataMap.compute(key) { _, v ->
-            v?.let {
-              if (player == Player.RED) v.copy(red = value.red) else v.copy(blue = value.blue)
-            } ?: if (player == Player.RED) GridData(value.red) else GridData(blue = value.blue)
+            v?.copy(blue = value.blue)
           }
-        } else {
-          incMap[key] = value
           break
         }
       }
-      if (incMap.isNotEmpty()) allGridDataMap.putAll(incMap)
+      if (hasOldKey.not()) allGridDataMap[key] = value
     }
   }
 
-  private fun convertPairs2GridDataMap(pairs: Pairs?, gridDataMap: MutableMap<Point, GridData>) {
-    pairs?.let {
-      if (it.first.point == it.second.point && it.first.point.equals(-1, -1).not()) {
-        gridDataMap[it.first.point] =
-          if (player == Player.RED) GridData(pairs) else GridData(blue = pairs)
-      } else {
-        if (player == Player.RED) {
-          if (it.first.isEmpty().not()) {
-            gridDataMap[it.first.point] = GridData(pairs.copy(second = emptyCharPoint()))
-          }
-          if (it.second.isEmpty().not()) {
-            gridDataMap[it.second.point] = GridData(pairs.copy(first = emptyCharPoint()))
-          }
-        } else {
-          if (it.first.isEmpty().not()) {
-            gridDataMap[it.first.point] = GridData(blue = pairs.copy(second = emptyCharPoint()))
-          }
-          if (it.second.isEmpty().not()) {
-            gridDataMap[it.second.point] = GridData(blue = pairs.copy(first = emptyCharPoint()))
-          }
-        }
-      }
-    }
+  override fun equals(other: Any?): Boolean {
+    val isEquality = super.equals(other)
+    other as GridUiState
+    return isEquality && (other.gridDataMap == gridDataMap)
+  }
+
+  override fun hashCode(): Int {
+    var result = randomLetters.hashCode()
+    result = 31 * result + round
+    result = 31 * result + player.hashCode()
+    result = 31 * result + playState.hashCode()
+    result = 31 * result + chosenLetter.hashCode()
+    result = 31 * result + gridDataMap.hashCode()
+    result = 31 * result + allGridDataMap.hashCode()
+    return result
   }
 }
 

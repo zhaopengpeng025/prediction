@@ -18,13 +18,6 @@ data class Pairs constructor(
 ) {
 
   var color: Color? = null
-
-  fun toList(): List<CharPoint> {
-    val list = mutableListOf<CharPoint>()
-    list += first
-    list += second
-    return list
-  }
 }
 
 data class GridData constructor(
@@ -35,13 +28,13 @@ data class GridData constructor(
 
   private fun blueColor() = Player.BLUE.color
 
-  fun toList(): List<Pairs> {
-    val list = mutableListOf<Pairs>()
-    red.color = redColor()
-    blue.color = blueColor()
-    list += red
-    list += blue
-    return list
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+    other as GridData
+    return (other.red == red && other.blue == blue) ||
+      (other.red.first == red.first && other.blue.first == blue.first &&
+        other.red.second == red.second && other.blue.second == blue.second)
   }
 }
 
@@ -51,5 +44,5 @@ enum class Player(val color: Color, val text: String) {
 }
 
 enum class PlayState {
-  IDLE, CHANCE1, CHANCE2, SHOW_RESULTS
+  IDLE, PLAYING, SHOW_RESULTS
 }

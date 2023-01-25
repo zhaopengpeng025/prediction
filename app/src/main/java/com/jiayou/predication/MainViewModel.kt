@@ -3,6 +3,7 @@ package com.jiayou.predication
 import android.graphics.Point
 import androidx.lifecycle.ViewModel
 import com.jiayou.predication.data.CharPoint
+import com.jiayou.predication.data.GridData
 import com.jiayou.predication.data.Pairs
 import com.jiayou.predication.data.PlayState
 import com.jiayou.predication.data.Player
@@ -19,14 +20,14 @@ import kotlinx.coroutines.flow.update
  ***********************************************/
 class MainViewModel : ViewModel() {
 
-  private val _uiState = MutableStateFlow(GridUiState(generateRandomChar()))
+  private val _uiState = MutableStateFlow(GridUiState(letterList()))
   val uiState: StateFlow<GridUiState> = _uiState.asStateFlow()
 
   private var round = 1
 
   init {
     _uiState.update {
-      it.copy(round = round, playState = PlayState.CHANCE1)
+      it.copy(round = round, player = Player.RED, playState = PlayState.PLAYING)
     }
   }
 
@@ -42,20 +43,25 @@ class MainViewModel : ViewModel() {
     return list
   }
 
+  private fun letterList() = listOf('A', 'B', 'C', 'X', 'Y', 'Z')
+
   fun pasteChosenLetter(point: Point) {
-    _uiState.update { state ->
-      val updatePairs =
-        (if (state.player == Player.RED) state.redPairs else state.bluePairs)?.copy() ?: Pairs()
-      if (state.playState == PlayState.CHANCE1) {
-        updatePairs.first = CharPoint(state.chosenLetter, point)
-      } else if (state.playState == PlayState.CHANCE2) {
-        updatePairs.second = CharPoint(state.chosenLetter, point)
-      }
-      if (state.player == Player.RED) {
-        state.copy(redPairs = updatePairs)
+    if(_uiState.value.chosenLetter == ' ') return
+    val map = mutableMapOf<Point, GridData>()
+    map.putAll(_uiState.value.gridDataMap)
+    map.compute(point) { k, v ->
+      v?.let {
+        val pairs = if (_uiState.value.isRed) v.red else v.blue
+        pairs.second = CharPoint(_uiState.value.chosenLetter, point)
+        it.copy()
+      } ?: if (_uiState.value.isRed) {
+        GridData(Pairs(CharPoint(_uiState.value.chosenLetter, point)))
       } else {
-        state.copy(bluePairs = updatePairs)
+        GridData(blue = Pairs(CharPoint(_uiState.value.chosenLetter, point)))
       }
+    }
+    _uiState.update { state ->
+      state.copy(gridDataMap = map)
     }
   }
 
@@ -67,48 +73,25 @@ class MainViewModel : ViewModel() {
 
   fun buttonOk() {
     _uiState.value.let { state ->
-      if (state.chosenLetter == ' ') return
-      val pairs = if (state.player == Player.RED) state.redPairs else state.bluePairs
-      pairs ?: return
-      if ((pairs.first.isEmpty() && state.playState == PlayState.CHANCE1) ||
-        (pairs.second.isEmpty() && state.playState == PlayState.CHANCE2)
-      ) return
+      if (state.chosenLetter == ' ' || state.gridDataMap.isEmpty()) return
     }
     _uiState.update { state ->
-      val newState = nextPlayState(state)
-      val newPlayer = nextPlayer(state)
-      if (newPlayer != null) {
-        state.saveGridDataMap()
+      val nextPlayer = nextPlayer(state)
+      state.saveGridDataMap()
+      if (nextPlayer != null) {
         state.copy(
-          playState = newState,
-          player = newPlayer,
+          player = nextPlayer,
           chosenLetter = ' ',
-          redPairs = null,
-          bluePairs = null
+          gridDataMap = mutableMapOf()
         )
       } else {
-        state.copy(playState = newState, chosenLetter = ' ')
+        state.copy(playState = PlayState.SHOW_RESULTS, chosenLetter = ' ')
       }
-    }
-  }
-
-  private fun nextPlayState(state: GridUiState) = when (state.playState) {
-    PlayState.CHANCE1 -> PlayState.CHANCE2
-    PlayState.CHANCE2 -> {
-      if (state.player == Player.BLUE) {
-        state.saveGridDataMap()
-        PlayState.SHOW_RESULTS
-      } else {
-        PlayState.CHANCE1
-      }
-    }
-    PlayState.IDLE, PlayState.SHOW_RESULTS -> {
-      PlayState.SHOW_RESULTS
     }
   }
 
   private fun nextPlayer(state: GridUiState): Player? {
-    return if (state.player == Player.RED && state.playState == PlayState.CHANCE2) {
+    return if (state.isRed) {
       Player.BLUE
     } else null
   }
@@ -120,18 +103,13 @@ class MainViewModel : ViewModel() {
 
   fun buttonClearLetters() {
     _uiState.update { state ->
-      if(state.player == Player.RED){
-        state.copy(redPairs = null, playState = PlayState.CHANCE1)
-      }else{
-        state.copy(bluePairs = null,playState = PlayState.CHANCE1)
-      }
+      state.copy(gridDataMap = mutableMapOf())
     }
   }
 
   private fun defaultState() = GridUiState(
-    generateRandomChar(),
-    round = ++round,
-    playState = PlayState.CHANCE1
+    letterList(),
+    round = ++round
   )
 
   companion object {

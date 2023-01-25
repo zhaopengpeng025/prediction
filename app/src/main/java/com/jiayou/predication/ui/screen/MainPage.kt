@@ -90,12 +90,12 @@ fun GameGrid(uiState: GridUiState) {
   val gridDataMap = if (uiState.playState == PlayState.SHOW_RESULTS) {
     uiState.allGridDataMap
   } else {
-    uiState.toGridDataMap()
+    uiState.gridDataMap
   }
 
   Column(Modifier.padding(top = 50.dp)) {
     for (y in 0 until MainViewModel.ROW) {
-      Row(Modifier.wrapContentSize()) {
+      Row {
         for (x in 0 until MainViewModel.COLUMN) {
           GridItem(
             findGridData(gridDataMap, x, y),
@@ -235,12 +235,6 @@ fun PreviewRandomBar() {
 
 @Composable
 fun TopTips(round: Int, player: Player, playState: PlayState) {
-  var chanceRound: Int = -1
-  if (playState == PlayState.CHANCE1) {
-    chanceRound = 1
-  } else if (playState == PlayState.CHANCE2) {
-    chanceRound = 2
-  }
   Column(
     Modifier.padding(top = 30.dp).height(100.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -256,7 +250,7 @@ fun TopTips(round: Int, player: Player, playState: PlayState) {
       }
       val playerString = buildAnnotatedString {
         withStyle(style = SpanStyle(player.color, 30.sp)) {
-          append("${player.text}轮次:$chanceRound")
+          append("${player.text}轮次")
         }
       }
       Text(text = roundString, fontSize = 20.sp, letterSpacing = 5.sp)
@@ -270,7 +264,7 @@ fun TopTips(round: Int, player: Player, playState: PlayState) {
 @Preview
 @Composable
 fun PrevTopTips() {
-  TopTips(round = 2, player = Player.BLUE, playState = PlayState.CHANCE2)
+  TopTips(round = 2, player = Player.BLUE, playState = PlayState.PLAYING)
 }
 
 fun main() {
