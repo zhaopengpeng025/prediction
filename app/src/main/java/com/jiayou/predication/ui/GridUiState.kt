@@ -4,6 +4,7 @@ import android.graphics.Point
 import android.util.Log
 import com.jiayou.predication.data.CharPoint
 import com.jiayou.predication.data.GridData
+import com.jiayou.predication.data.Loading
 import com.jiayou.predication.data.Pairs
 import com.jiayou.predication.data.PlayState
 import com.jiayou.predication.data.Player
@@ -14,6 +15,7 @@ import com.jiayou.predication.data.Player
  * Describe:
  ***********************************************/
 data class GridUiState(
+  val isLoading: Loading = Loading(),
   val randomLetters: List<Char>,
   val round: Int = -1,
   val player: Player = Player.RED,

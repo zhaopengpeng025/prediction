@@ -33,8 +33,10 @@ data class GridData constructor(
     if (javaClass != other?.javaClass) return false
     other as GridData
     return (other.red == red && other.blue == blue) ||
-      (other.red.first == red.first && other.blue.first == blue.first &&
-        other.red.second == red.second && other.blue.second == blue.second)
+      (
+        other.red.first == red.first && other.blue.first == blue.first &&
+          other.red.second == red.second && other.blue.second == blue.second
+        )
   }
 }
 
@@ -46,3 +48,5 @@ enum class Player(val color: Color, val text: String) {
 enum class PlayState {
   IDLE, PLAYING, SHOW_RESULTS
 }
+
+data class Loading(val isLoading: Boolean = false, val delay: Int = 3)

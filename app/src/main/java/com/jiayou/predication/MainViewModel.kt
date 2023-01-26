@@ -2,16 +2,20 @@ package com.jiayou.predication
 
 import android.graphics.Point
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.jiayou.predication.data.CharPoint
 import com.jiayou.predication.data.GridData
+import com.jiayou.predication.data.Loading
 import com.jiayou.predication.data.Pairs
 import com.jiayou.predication.data.PlayState
 import com.jiayou.predication.data.Player
 import com.jiayou.predication.ui.GridUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /***********************************************
  * Author: ZhaoPengpeng
@@ -20,7 +24,7 @@ import kotlinx.coroutines.flow.update
  ***********************************************/
 class MainViewModel : ViewModel() {
 
-  private val _uiState = MutableStateFlow(GridUiState(letterList()))
+  private val _uiState = MutableStateFlow(GridUiState(randomLetters = letterList()))
   val uiState: StateFlow<GridUiState> = _uiState.asStateFlow()
 
   private var round = 1
@@ -46,10 +50,10 @@ class MainViewModel : ViewModel() {
   private fun letterList() = listOf('A', 'B', 'C', 'X', 'Y', 'Z')
 
   fun pasteChosenLetter(point: Point) {
-    if(_uiState.value.chosenLetter == ' ') return
+    if (_uiState.value.chosenLetter == ' ') return
     val map = mutableMapOf<Point, GridData>()
     map.putAll(_uiState.value.gridDataMap)
-    map.compute(point) { k, v ->
+    map.compute(point) { _, v ->
       v?.let {
         val pairs = if (_uiState.value.isRed) v.red else v.blue
         pairs.second = CharPoint(_uiState.value.chosenLetter, point)
@@ -72,20 +76,35 @@ class MainViewModel : ViewModel() {
   }
 
   fun buttonOk() {
+    if(_uiState.value.isLoading.isLoading) return
     _uiState.value.let { state ->
       if (state.chosenLetter == ' ' || state.gridDataMap.isEmpty()) return
     }
-    _uiState.update { state ->
-      val nextPlayer = nextPlayer(state)
-      state.saveGridDataMap()
-      if (nextPlayer != null) {
-        state.copy(
-          player = nextPlayer,
-          chosenLetter = ' ',
-          gridDataMap = mutableMapOf()
-        )
-      } else {
-        state.copy(playState = PlayState.SHOW_RESULTS, chosenLetter = ' ')
+    viewModelScope.launch {
+      _uiState.update {
+        it.copy(isLoading = loading())
+      }
+      while (_uiState.value.isLoading.delay > 0) {
+        delay(1000)
+        _uiState.update {
+          it.copy(isLoading = it.isLoading.copy(delay = it.isLoading.delay - 1))
+        }
+      }
+      _uiState.update {
+        it.copy(isLoading = loadingFinish())
+      }
+      _uiState.update { state ->
+        val nextPlayer = nextPlayer(state)
+        state.saveGridDataMap()
+        if (nextPlayer != null) {
+          state.copy(
+            player = nextPlayer,
+            chosenLetter = ' ',
+            gridDataMap = mutableMapOf()
+          )
+        } else {
+          state.copy(playState = PlayState.SHOW_RESULTS, chosenLetter = ' ')
+        }
       }
     }
   }
@@ -108,9 +127,13 @@ class MainViewModel : ViewModel() {
   }
 
   private fun defaultState() = GridUiState(
-    letterList(),
+    randomLetters = letterList(),
     round = ++round
   )
+
+  private fun loading() = Loading(true, 3)
+
+  private fun loadingFinish() = Loading(false, -1)
 
   companion object {
     const val COLUMN = 5

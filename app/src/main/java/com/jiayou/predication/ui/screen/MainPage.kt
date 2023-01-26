@@ -17,9 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,35 +53,68 @@ import com.jiayou.predication.ui.GridUiState
  ***********************************************/
 @Composable
 fun GameMainScreen() {
-  Column(
-    Modifier
-      .fillMaxSize()
-      .background(MaterialTheme.colorScheme.background),
-    horizontalAlignment = Alignment.CenterHorizontally
-  ) {
+  Box(contentAlignment = Alignment.Center) {
     val viewModel: MainViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
-
-    TopTips(uiState.round, uiState.player, uiState.playState)
-
-    GameGrid(uiState)
-
-    RandomCharBar(uiState.randomLetters, uiState.chosenLetter, uiState.player)
-
-    OutlinedButton(
-      onClick = { viewModel.buttonOk() },
+    Column(
       Modifier
-        .width(250.dp)
-        .padding(top = 30.dp)
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background),
+      horizontalAlignment = Alignment.CenterHorizontally
     ) {
-      Text(text = "OK")
-    }
+      TopTips(uiState.round, uiState.player, uiState.playState)
 
-    OutlinedButton(
-      onClick = { viewModel.buttonNextRound() },
-      Modifier.width(250.dp)
-    ) {
-      Text(text = "NEXT")
+      GameGrid(uiState)
+
+      RandomCharBar(uiState.randomLetters, uiState.chosenLetter, uiState.player)
+
+      OutlinedButton(
+        onClick = { viewModel.buttonOk() },
+        Modifier
+          .width(250.dp)
+          .padding(top = 30.dp)
+      ) {
+        Text(text = "OK")
+      }
+
+      OutlinedButton(
+        onClick = { viewModel.buttonNextRound() },
+        Modifier.width(250.dp)
+      ) {
+        Text(text = "NEXT")
+      }
+    }
+    val isLoading = uiState.isLoading
+    if (isLoading.isLoading) {
+      TimeProgress(isLoading.delay.toString())
+    }
+  }
+}
+
+@Preview
+@Composable
+fun TimeProgress(delay: String = "2") {
+  Surface(
+    Modifier.padding(10.dp),
+    tonalElevation = 2.dp,
+    shadowElevation = 5.dp
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Box(contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+        Box(
+          Modifier.size(30.dp),
+          contentAlignment = Alignment.Center
+        ) {
+          Text(text = delay, fontSize = 20.sp, textAlign = TextAlign.Center)
+        }
+      }
+      Text(
+        text = "加载中...",
+        Modifier.padding(start = 10.dp, end = 20.dp),
+        fontSize = 15.sp,
+        textAlign = TextAlign.Center
+      )
     }
   }
 }
@@ -236,7 +270,7 @@ fun PreviewRandomBar() {
 @Composable
 fun TopTips(round: Int, player: Player, playState: PlayState) {
   Column(
-    Modifier.padding(top = 30.dp).height(100.dp),
+    Modifier.padding(top = 60.dp).height(100.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
   ) {
@@ -265,10 +299,4 @@ fun TopTips(round: Int, player: Player, playState: PlayState) {
 @Composable
 fun PrevTopTips() {
   TopTips(round = 2, player = Player.BLUE, playState = PlayState.PLAYING)
-}
-
-fun main() {
-  val c: Char = '1'
-
-  println("dsf$c")
 }
