@@ -76,18 +76,20 @@ class MainViewModel : ViewModel() {
   }
 
   fun buttonOk() {
-    if(_uiState.value.isLoading.isLoading) return
+    if (_uiState.value.isLoading.isLoading) return
     _uiState.value.let { state ->
       if (state.chosenLetter == ' ' || state.gridDataMap.isEmpty()) return
     }
     viewModelScope.launch {
-      _uiState.update {
-        it.copy(isLoading = loading())
-      }
-      while (_uiState.value.isLoading.delay > 0) {
-        delay(1000)
+      if (_uiState.value.player == Player.BLUE) {
         _uiState.update {
-          it.copy(isLoading = it.isLoading.copy(delay = it.isLoading.delay - 1))
+          it.copy(isLoading = loading())
+        }
+        while (_uiState.value.isLoading.delay > 0) {
+          delay(1000)
+          _uiState.update {
+            it.copy(isLoading = it.isLoading.copy(delay = it.isLoading.delay - 1))
+          }
         }
       }
       _uiState.update {

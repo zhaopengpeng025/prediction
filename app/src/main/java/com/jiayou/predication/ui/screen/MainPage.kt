@@ -76,12 +76,13 @@ fun GameMainScreen() {
       ) {
         Text(text = "OK")
       }
-
-      OutlinedButton(
-        onClick = { viewModel.buttonNextRound() },
-        Modifier.width(250.dp)
-      ) {
-        Text(text = "NEXT")
+      if(uiState.playState == PlayState.SHOW_RESULTS) {
+        OutlinedButton(
+          onClick = { viewModel.buttonNextRound() },
+          Modifier.width(250.dp)
+        ) {
+          Text(text = "NEXT")
+        }
       }
     }
     val isLoading = uiState.isLoading
