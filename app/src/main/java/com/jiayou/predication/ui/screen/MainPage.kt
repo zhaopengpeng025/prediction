@@ -97,7 +97,6 @@ fun GameMainScreen() {
 fun TimeProgress(delay: String = "2") {
   Surface(
     Modifier.padding(10.dp),
-    tonalElevation = 2.dp,
     shadowElevation = 5.dp
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -291,7 +290,7 @@ fun TopTips(round: Int, player: Player, playState: PlayState) {
       Text(text = roundString, fontSize = 20.sp, letterSpacing = 5.sp)
       Text(text = playerString, fontSize = 20.sp, letterSpacing = 5.sp)
     } else {
-      Text(text = "本轮完毕 展示双方选择结果")
+      Text(text = "第${round}轮完毕 展示双方选择结果")
     }
   }
 }
