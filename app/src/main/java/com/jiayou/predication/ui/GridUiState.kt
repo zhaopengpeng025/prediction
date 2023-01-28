@@ -38,8 +38,8 @@ data class GridUiState(
     for ((key, value) in map) {
       var hasOldKey = false
       for (allKey in allGridDataMap.keys) {
-        // allKey 为 RED key; key 为 BLUE key
         if (key == allKey) {
+          // allKey 为 RED key; key 为 BLUE key
           hasOldKey = true
           allGridDataMap.compute(key) { _, v ->
             v?.copy(blue = value.blue)
