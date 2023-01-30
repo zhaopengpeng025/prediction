@@ -68,20 +68,21 @@ fun GameMainScreen() {
 
       RandomCharBar(uiState.randomLetters, uiState.chosenLetter, uiState.player)
 
-      OutlinedButton(
-        onClick = { viewModel.buttonOk() },
-        Modifier
-          .width(250.dp)
-          .padding(top = 30.dp)
-      ) {
-        Text(text = "OK")
-      }
-      if(uiState.playState == PlayState.SHOW_RESULTS) {
+      if (uiState.playState == PlayState.SHOW_RESULTS) {
         OutlinedButton(
           onClick = { viewModel.buttonNextRound() },
-          Modifier.width(250.dp)
+          Modifier.width(250.dp).padding(top = 30.dp)
         ) {
           Text(text = "NEXT")
+        }
+      } else {
+        OutlinedButton(
+          onClick = { viewModel.buttonOk() },
+          Modifier
+            .width(250.dp)
+            .padding(top = 30.dp)
+        ) {
+          Text(text = "OK")
         }
       }
     }
@@ -94,7 +95,7 @@ fun GameMainScreen() {
 
 @Preview
 @Composable
-fun TimeProgress(delay: String = "2") {
+fun TimeProgress(delay: String = "1") {
   Surface(
     Modifier.padding(10.dp),
     shadowElevation = 5.dp
@@ -299,4 +300,8 @@ fun TopTips(round: Int, player: Player, playState: PlayState) {
 @Composable
 fun PrevTopTips() {
   TopTips(round = 2, player = Player.BLUE, playState = PlayState.PLAYING)
+}
+
+fun main() {
+  //
 }
